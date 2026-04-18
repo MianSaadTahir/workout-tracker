@@ -3,10 +3,11 @@ package com.example.workouttracker.data
 import com.example.workouttracker.model.Workout
 
 object WorkoutRepository {
-    private val workouts = mutableListOf<Workout>()
+    private fun getWorkouts() = AppRepository.getWorkoutsForCurrentUser()
     private var nextId = 1
 
     fun addWorkout(workout: Workout) {
+        val workouts = getWorkouts()
         if (workout.id == -1) {
             workout.id = nextId++
             workouts.add(workout)
@@ -19,23 +20,23 @@ object WorkoutRepository {
         }
     }
 
-    fun getAllWorkouts(): List<Workout> = workouts
+    fun getAllWorkouts(): List<Workout> = getWorkouts()
 
     fun deleteWorkout(id: Int) {
-        workouts.removeAll { it.id == id }
+        getWorkouts().removeAll { it.id == id }
     }
 
     fun getWorkoutById(id: Int): Workout? {
-        return workouts.find { it.id == id }
+        return getWorkouts().find { it.id == id }
     }
 
-    fun getTotalWorkouts() = workouts.size
-    fun getTotalSets() = workouts.sumOf { it.sets }
-    fun getTotalReps() = workouts.sumOf { it.reps }
+    fun getTotalWorkouts() = getWorkouts().size
+    fun getTotalSets() = getWorkouts().sumOf { it.sets }
+    fun getTotalReps() = getWorkouts().sumOf { it.reps }
     fun getEstimatedCaloriesBurned(): Double {
         // Simple formula: total_volume * 0.1
         // Volume = sets * reps * weight
-        val totalVolume = workouts.sumOf { it.sets * it.reps * it.weight }
+        val totalVolume = getWorkouts().sumOf { it.sets * it.reps * it.weight }
         return totalVolume * 0.1
     }
 }

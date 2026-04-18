@@ -20,7 +20,7 @@ class SplashActivity : AppCompatActivity() {
 
         // Delayed navigation to Welcome Screen after 2 seconds
         Handler(Looper.getMainLooper()).postDelayed({
-            val intent = Intent(this, WelcomeActivity::class.java)
+            val intent = Intent(this, AuthActivity::class.java)
             startActivity(intent)
             finish()
         }, 2000)
