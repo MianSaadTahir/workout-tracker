@@ -13,6 +13,18 @@ A simple and intuitive Android application designed to help users log their exer
 - **Progress Summary**: Get personal insights into your total workouts, sets, reps, and estimated calories burned.
 - **Sleek UI**: Modern interface with a navigation drawer and Material Design components.
 
+## Screenshots
+
+<img src="/assets/1.jpg" alt="1" width="75%">
+<img src="/assets/2.jpg" alt="2" width="75%">
+<img src="/assets/3.jpg" alt="3" width="75%">
+<img src="/assets/4.jpg" alt="4" width="75%">
+<img src="/assets/5.jpg" alt="5" width="75%">
+<img src="/assets/6.jpg" alt="6" width="75%">
+<img src="/assets/7.jpg" alt="7" width="75%">
+<img src="/assets/8.jpg" alt="8" width="75%">
+
+
 ## 🛠️ Technologies Used
 
 - **Language**: [Kotlin](https://kotlinlang.org/)
