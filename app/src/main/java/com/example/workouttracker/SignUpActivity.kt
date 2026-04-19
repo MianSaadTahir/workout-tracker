@@ -22,8 +22,9 @@ class SignUpActivity : AppCompatActivity() {
                 val name = binding.etName.text.toString().trim()
                 val email = binding.etEmail.text.toString().trim()
                 val password = binding.etPassword.text.toString().trim()
+                val gender = if (binding.rbMale.isChecked) "Male" else "Female"
 
-                val newUser = User(name, email, password, 0, "Male")
+                val newUser = User(name, email, password, 0, gender)
                 if (AppRepository.registerUser(newUser)) {
                     Toast.makeText(this, "Registration Successful", Toast.LENGTH_SHORT).show()
                     finish()

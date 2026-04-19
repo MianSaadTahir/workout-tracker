@@ -1,6 +1,7 @@
 package com.example.workouttracker
 
 import android.os.Bundle
+import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.workouttracker.data.WorkoutRepository
@@ -11,11 +12,16 @@ class AddWorkoutActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAddWorkoutBinding
     private var workoutId: Int = -1
+    private val categories = arrayOf("Chest", "Back", "Legs", "Biceps", "Triceps", "Shoulders")
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityAddWorkoutBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categories)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.spinnerCategory.adapter = adapter
 
         workoutId = intent.getIntExtra("WORKOUT_ID", -1)
         if (workoutId != -1) {
@@ -36,11 +42,9 @@ class AddWorkoutActivity : AppCompatActivity() {
             binding.etReps.setText(it.reps.toString())
             binding.etWeight.setText(it.weight.toString())
             
-            when (it.category) {
-                "Chest" -> binding.rbChest.isChecked = true
-                "Legs" -> binding.rbLegs.isChecked = true
-                "Back" -> binding.rbBack.isChecked = true
-                "Arms" -> binding.rbArms.isChecked = true
+            val categoryIndex = categories.indexOf(it.category)
+            if (categoryIndex != -1) {
+                binding.spinnerCategory.setSelection(categoryIndex)
             }
         }
     }
@@ -60,13 +64,7 @@ class AddWorkoutActivity : AppCompatActivity() {
         val reps = repsStr.toIntOrNull() ?: 0
         val weight = weightStr.toDoubleOrNull() ?: 0.0
 
-        val category = when (binding.rgCategory.checkedRadioButtonId) {
-            binding.rbChest.id -> "Chest"
-            binding.rbLegs.id -> "Legs"
-            binding.rbBack.id -> "Back"
-            binding.rbArms.id -> "Arms"
-            else -> "Chest"
-        }
+        val category = binding.spinnerCategory.selectedItem.toString()
 
         val workout = Workout(workoutId, name, sets, reps, weight, category)
         WorkoutRepository.addWorkout(workout)
