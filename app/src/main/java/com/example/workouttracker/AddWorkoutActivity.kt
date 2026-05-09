@@ -4,14 +4,17 @@ import android.os.Bundle
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.workouttracker.data.WorkoutRepository
+import com.example.workouttracker.data.FirebaseRepository
 import com.example.workouttracker.databinding.ActivityAddWorkoutBinding
 import com.example.workouttracker.model.Workout
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
 
 class AddWorkoutActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAddWorkoutBinding
-    private var workoutId: Int = -1
+    private var workoutId: String? = null
     private val categories = arrayOf("Chest", "Back", "Legs", "Biceps", "Triceps", "Shoulders")
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -23,8 +26,8 @@ class AddWorkoutActivity : AppCompatActivity() {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spinnerCategory.adapter = adapter
 
-        workoutId = intent.getIntExtra("WORKOUT_ID", -1)
-        if (workoutId != -1) {
+        workoutId = intent.getStringExtra("WORKOUT_ID")
+        if (workoutId != null) {
             setupEditMode()
         }
 
@@ -35,18 +38,27 @@ class AddWorkoutActivity : AppCompatActivity() {
 
     private fun setupEditMode() {
         binding.tvTitle.text = "Edit Workout"
-        val workout = WorkoutRepository.getWorkoutById(workoutId)
-        workout?.let {
-            binding.etName.setText(it.name)
-            binding.etSets.setText(it.sets.toString())
-            binding.etReps.setText(it.reps.toString())
-            binding.etWeight.setText(it.weight.toString())
-            
-            val categoryIndex = categories.indexOf(it.category)
-            if (categoryIndex != -1) {
-                binding.spinnerCategory.setSelection(categoryIndex)
-            }
-        }
+        val uid = FirebaseRepository.getCurrentUserId()
+        val id = workoutId ?: return
+        
+        FirebaseRepository.database.child("workouts").child(uid).child(id)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val workout = snapshot.getValue(Workout::class.java) ?: return
+                    binding.etName.setText(workout.name)
+                    binding.etSets.setText(workout.sets.toString())
+                    binding.etReps.setText(workout.reps.toString())
+                    binding.etWeight.setText(workout.weight.toString())
+                    
+                    val categoryIndex = categories.indexOf(workout.category)
+                    if (categoryIndex != -1) {
+                        binding.spinnerCategory.setSelection(categoryIndex)
+                    }
+                }
+                override fun onCancelled(error: DatabaseError) {
+                    Toast.makeText(this@AddWorkoutActivity, error.message, Toast.LENGTH_SHORT).show()
+                }
+            })
     }
 
     private fun saveWorkout() {
@@ -66,10 +78,20 @@ class AddWorkoutActivity : AppCompatActivity() {
 
         val category = binding.spinnerCategory.selectedItem.toString()
 
-        val workout = Workout(workoutId, name, sets, reps, weight, category)
-        WorkoutRepository.addWorkout(workout)
-
-        Toast.makeText(this, "Workout Saved", Toast.LENGTH_SHORT).show()
-        finish()
+        val uid = FirebaseRepository.getCurrentUserId()
+        if (uid.isEmpty()) return
+        
+        val ref = FirebaseRepository.database.child("workouts").child(uid)
+        val id = workoutId ?: ref.push().key ?: return
+        
+        val workout = Workout(id, name, sets, reps, weight, category)
+        ref.child(id).setValue(workout)
+            .addOnSuccessListener {
+                Toast.makeText(this, "Workout Saved", Toast.LENGTH_SHORT).show()
+                finish()
+            }
+            .addOnFailureListener {
+                Toast.makeText(this, it.message, Toast.LENGTH_SHORT).show()
+            }
     }
 }

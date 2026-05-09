@@ -1,10 +1,10 @@
 package com.example.workouttracker.model
 
 data class Workout(
-    var id: Int,
-    val name: String,
-    val sets: Int,
-    val reps: Int,
-    val weight: Double,
-    val category: String
+    val id: String = "",
+    val name: String = "",
+    val sets: Int = 0,
+    val reps: Int = 0,
+    val weight: Double = 0.0,
+    val category: String = ""
 )

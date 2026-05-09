@@ -5,7 +5,8 @@ import android.os.Bundle
 import android.util.Patterns
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.workouttracker.data.AppRepository
+import android.view.View
+import com.example.workouttracker.data.FirebaseRepository
 import com.example.workouttracker.databinding.ActivitySignUpBinding
 import com.example.workouttracker.model.User
 
@@ -24,13 +25,32 @@ class SignUpActivity : AppCompatActivity() {
                 val password = binding.etPassword.text.toString().trim()
                 val gender = if (binding.rbMale.isChecked) "Male" else "Female"
 
-                val newUser = User(name, email, password, 0, gender)
-                if (AppRepository.registerUser(newUser)) {
-                    Toast.makeText(this, "Registration Successful", Toast.LENGTH_SHORT).show()
-                    finish()
-                } else {
-                    Toast.makeText(this, "Email already registered", Toast.LENGTH_SHORT).show()
-                }
+                binding.progressBar.visibility = View.VISIBLE
+                FirebaseRepository.auth.createUserWithEmailAndPassword(email, password)
+                    .addOnSuccessListener { result ->
+                        val uid = result.user?.uid ?: return@addOnSuccessListener
+                        val userMap = mapOf(
+                            "name" to name,
+                            "email" to email,
+                            "age" to 0,
+                            "gender" to gender
+                        )
+                        FirebaseRepository.database.child("users").child(uid).setValue(userMap)
+                            .addOnSuccessListener {
+                                binding.progressBar.visibility = View.GONE
+                                Toast.makeText(this, "Registration Successful", Toast.LENGTH_SHORT).show()
+                                startActivity(Intent(this, SignInActivity::class.java))
+                                finish()
+                            }
+                            .addOnFailureListener {
+                                binding.progressBar.visibility = View.GONE
+                                Toast.makeText(this, it.message, Toast.LENGTH_SHORT).show()
+                            }
+                    }
+                    .addOnFailureListener {
+                        binding.progressBar.visibility = View.GONE
+                        Toast.makeText(this, it.message, Toast.LENGTH_SHORT).show()
+                    }
             }
         }
     }

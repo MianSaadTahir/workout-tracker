@@ -4,7 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.example.workouttracker.data.AppRepository
+import android.view.View
+import com.example.workouttracker.data.FirebaseRepository
 import com.example.workouttracker.databinding.ActivitySignInBinding
 
 class SignInActivity : AppCompatActivity() {
@@ -33,15 +34,19 @@ class SignInActivity : AppCompatActivity() {
                 binding.tilPassword.error = null
             }
 
-            val user = AppRepository.loginUser(email, password)
-            if (user != null) {
-                val intent = Intent(this, MainActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                startActivity(intent)
-                finish()
-            } else {
-                Toast.makeText(this, "Invalid email or password", Toast.LENGTH_SHORT).show()
-            }
+            binding.progressBar.visibility = View.VISIBLE
+            FirebaseRepository.auth.signInWithEmailAndPassword(email, password)
+                .addOnSuccessListener {
+                    binding.progressBar.visibility = View.GONE
+                    val intent = Intent(this, MainActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    startActivity(intent)
+                    finish()
+                }
+                .addOnFailureListener {
+                    binding.progressBar.visibility = View.GONE
+                    Toast.makeText(this, "Invalid email or password", Toast.LENGTH_SHORT).show()
+                }
         }
     }
 }
