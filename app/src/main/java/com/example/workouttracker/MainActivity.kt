@@ -4,7 +4,11 @@ import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Base64
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
@@ -37,6 +41,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var adapter: WorkoutAdapter
     private lateinit var toggle: ActionBarDrawerToggle
+    private var searchItem: MenuItem? = null
 
     private val addWorkoutLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -126,6 +131,11 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         refreshDrawerHeader()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        searchItem?.collapseActionView()
     }
 
     private fun refreshDrawerHeader() {
@@ -264,15 +274,7 @@ class MainActivity : AppCompatActivity() {
                     binding.tvSummaryThisWeek.text = thisWeekCount.toString()
                     binding.tvSummaryCalories.text = calStr
                     
-                    adapter.updateList(workoutList)
-                    
-                    if (workoutList.isEmpty()) {
-                        binding.rvWorkouts.visibility = View.GONE
-                        binding.tvEmptyState.visibility = View.VISIBLE
-                    } else {
-                        binding.rvWorkouts.visibility = View.VISIBLE
-                        binding.tvEmptyState.visibility = View.GONE
-                    }
+                    filterWorkouts(getCurrentSearchQuery())
                 }
 
                 override fun onCancelled(error: DatabaseError) {
@@ -312,17 +314,8 @@ class MainActivity : AppCompatActivity() {
                         binding.tvSummaryThisWeek.text = totalCount.toString()
                         binding.tvSummaryCalories.text = calStr
                         
-                        adapter.updateList(updatedList)
-                        
+                        filterWorkouts(getCurrentSearchQuery())
                         binding.progressBar.visibility = View.GONE
-                        
-                        if (updatedList.isEmpty()) {
-                            binding.rvWorkouts.visibility = View.GONE
-                            binding.tvEmptyState.visibility = View.VISIBLE
-                        } else {
-                            binding.rvWorkouts.visibility = View.VISIBLE
-                            binding.tvEmptyState.visibility = View.GONE
-                        }
                     }
                     .addOnFailureListener {
                         binding.progressBar.visibility = View.GONE
@@ -338,6 +331,58 @@ class MainActivity : AppCompatActivity() {
             binding.drawerLayout.closeDrawer(GravityCompat.START)
         } else {
             super.onBackPressed()
+        }
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.main_menu, menu)
+        searchItem = menu.findItem(R.id.action_search)
+        val searchView = searchItem?.actionView as? androidx.appcompat.widget.SearchView
+        
+        searchView?.queryHint = "Search exercises..."
+        searchView?.setOnQueryTextListener(object : androidx.appcompat.widget.SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean = false
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                filterWorkouts(newText ?: "")
+                return true
+            }
+        })
+
+        searchItem?.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
+            override fun onMenuItemActionExpand(item: MenuItem): Boolean = true
+
+            override fun onMenuItemActionCollapse(item: MenuItem): Boolean {
+                filterWorkouts("") // Reset filter on collapse
+                return true
+            }
+        })
+
+        return true
+    }
+
+    private fun getCurrentSearchQuery(): String {
+        val searchView = searchItem?.actionView as? androidx.appcompat.widget.SearchView
+        return if (searchItem?.isActionViewExpanded == true) searchView?.query?.toString() ?: "" else ""
+    }
+
+    private fun filterWorkouts(query: String) {
+        val trimmedQuery = query.trim().lowercase()
+        val allWorkouts = WorkoutRepository.getAllWorkouts()
+        val filteredList = if (trimmedQuery.isEmpty()) {
+            allWorkouts
+        } else {
+            allWorkouts.filter { it.name.trim().lowercase().contains(trimmedQuery) }
+        }
+        adapter.updateList(filteredList)
+
+        if (filteredList.isEmpty()) {
+            binding.rvWorkouts.visibility = View.GONE
+            binding.tvEmptyState.text = if (trimmedQuery.isEmpty()) "No workouts added yet. Start your journey!" else "No workouts found matching \"$query\""
+            binding.tvEmptyState.visibility = View.VISIBLE
+        } else {
+            binding.rvWorkouts.visibility = View.VISIBLE
+            binding.tvEmptyState.visibility = View.GONE
         }
     }
 }
