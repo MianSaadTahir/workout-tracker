@@ -7,11 +7,13 @@ import android.os.Bundle
 import android.util.Base64
 import java.io.ByteArrayOutputStream
 import android.widget.Toast
+import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.example.workouttracker.database.UserProfileDatabase
 import com.example.workouttracker.data.FirebaseRepository
+import com.example.workouttracker.data.AppRepository
 import com.example.workouttracker.databinding.ActivityProfileBinding
 import com.example.workouttracker.model.User
 import com.example.workouttracker.model.UserProfileEntity
@@ -50,6 +52,10 @@ class ProfileActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityProfileBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        binding.btnBack.setOnClickListener {
+            finish()
+        }
 
         loadUserData()
         loadProfilePicFromRoom()
@@ -113,6 +119,19 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     private fun loadUserData() {
+        val cachedUser = AppRepository.currentUser
+        if (cachedUser != null) {
+            binding.etEmail.setText(cachedUser.email)
+            binding.etName.setText(cachedUser.name)
+            binding.etAge.setText(if (cachedUser.age > 0) cachedUser.age.toString() else "")
+            
+            if (cachedUser.gender == "Male") {
+                binding.rbMale.isChecked = true
+            } else if (cachedUser.gender == "Female") {
+                binding.rbFemale.isChecked = true
+            }
+        }
+
         val uid = FirebaseRepository.getCurrentUserId()
         if (uid.isEmpty()) return
 
@@ -120,22 +139,26 @@ class ProfileActivity : AppCompatActivity() {
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val user = snapshot.getValue(User::class.java) ?: return
-                    binding.etEmail.setText(user.email)
-                    binding.etName.setText(user.name)
-                    binding.etAge.setText(if (user.age > 0) user.age.toString() else "")
+                    
+                    // Update cache
+                    AppRepository.currentUser = user
+                    AppRepository.registerUser(user)
+                    
+                    if (!binding.etEmail.isFocused) {
+                        binding.etEmail.setText(user.email)
+                    }
+                    if (!binding.etName.isFocused) {
+                        binding.etName.setText(user.name)
+                    }
+                    if (!binding.etAge.isFocused) {
+                        binding.etAge.setText(if (user.age > 0) user.age.toString() else "")
+                    }
                     
                     if (user.gender == "Male") {
                         binding.rbMale.isChecked = true
                     } else if (user.gender == "Female") {
                         binding.rbFemale.isChecked = true
                     }
-
-                    // We no longer load profile picture from Firebase here as we use Room
-                    /*
-                    user.profilePicUri?.let {
-                        binding.ivProfilePic.setImageURI(Uri.parse(it))
-                    }
-                    */
                 }
                 override fun onCancelled(error: DatabaseError) {}
             })
@@ -171,13 +194,15 @@ class ProfileActivity : AppCompatActivity() {
         )
         
         // profilePicUri is NOT saved to Firebase anymore
-
+        binding.progressBar.visibility = View.VISIBLE
         FirebaseRepository.database.child("users").child(uid).updateChildren(updates)
             .addOnSuccessListener {
+                binding.progressBar.visibility = View.GONE
                 Toast.makeText(this, "Profile updated", Toast.LENGTH_SHORT).show()
                 finish()
             }
             .addOnFailureListener {
+                binding.progressBar.visibility = View.GONE
                 Toast.makeText(this, it.message, Toast.LENGTH_SHORT).show()
             }
     }

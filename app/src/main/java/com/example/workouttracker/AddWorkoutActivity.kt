@@ -5,11 +5,10 @@ import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.workouttracker.data.FirebaseRepository
+import com.example.workouttracker.data.WorkoutRepository
 import com.example.workouttracker.databinding.ActivityAddWorkoutBinding
 import com.example.workouttracker.model.Workout
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.ValueEventListener
+import android.view.View
 
 class AddWorkoutActivity : AppCompatActivity() {
 
@@ -21,6 +20,10 @@ class AddWorkoutActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityAddWorkoutBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        binding.btnBack.setOnClickListener {
+            finish()
+        }
 
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categories)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -38,27 +41,20 @@ class AddWorkoutActivity : AppCompatActivity() {
 
     private fun setupEditMode() {
         binding.tvTitle.text = "Edit Workout"
-        val uid = FirebaseRepository.getCurrentUserId()
         val id = workoutId ?: return
         
-        FirebaseRepository.database.child("workouts").child(uid).child(id)
-            .addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    val workout = snapshot.getValue(Workout::class.java) ?: return
-                    binding.etName.setText(workout.name)
-                    binding.etSets.setText(workout.sets.toString())
-                    binding.etReps.setText(workout.reps.toString())
-                    binding.etWeight.setText(workout.weight.toString())
-                    
-                    val categoryIndex = categories.indexOf(workout.category)
-                    if (categoryIndex != -1) {
-                        binding.spinnerCategory.setSelection(categoryIndex)
-                    }
-                }
-                override fun onCancelled(error: DatabaseError) {
-                    Toast.makeText(this@AddWorkoutActivity, error.message, Toast.LENGTH_SHORT).show()
-                }
-            })
+        val workout = WorkoutRepository.getWorkoutById(id)
+        if (workout != null) {
+            binding.etName.setText(workout.name)
+            binding.etSets.setText(workout.sets.toString())
+            binding.etReps.setText(workout.reps.toString())
+            binding.etWeight.setText(workout.weight.toString())
+            
+            val categoryIndex = categories.indexOf(workout.category)
+            if (categoryIndex != -1) {
+                binding.spinnerCategory.setSelection(categoryIndex)
+            }
+        }
     }
 
     private fun saveWorkout() {
@@ -85,12 +81,16 @@ class AddWorkoutActivity : AppCompatActivity() {
         val id = workoutId ?: ref.push().key ?: return
         
         val workout = Workout(id, name, sets, reps, weight, category)
+        binding.progressBar.visibility = View.VISIBLE
         ref.child(id).setValue(workout)
             .addOnSuccessListener {
+                binding.progressBar.visibility = View.GONE
                 Toast.makeText(this, "Workout Saved", Toast.LENGTH_SHORT).show()
+                setResult(RESULT_OK)
                 finish()
             }
             .addOnFailureListener {
+                binding.progressBar.visibility = View.GONE
                 Toast.makeText(this, it.message, Toast.LENGTH_SHORT).show()
             }
     }

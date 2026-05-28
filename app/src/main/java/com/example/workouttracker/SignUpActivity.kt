@@ -18,6 +18,10 @@ class SignUpActivity : AppCompatActivity() {
         binding = ActivitySignUpBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding.btnBack.setOnClickListener {
+            finish()
+        }
+
         binding.btnSignUp.setOnClickListener {
             if (validateForm()) {
                 val name = binding.etName.text.toString().trim()

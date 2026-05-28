@@ -1,8 +1,11 @@
 package com.example.workouttracker
 
 import android.os.Bundle
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.workouttracker.data.FirebaseRepository
+import com.example.workouttracker.data.AppRepository
+import com.example.workouttracker.data.WorkoutRepository
 import com.example.workouttracker.databinding.ActivitySummaryBinding
 import com.example.workouttracker.model.Workout
 import com.google.firebase.database.DataSnapshot
@@ -20,40 +23,66 @@ class SummaryActivity : AppCompatActivity() {
 
         displaySummary()
 
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            loadFreshWorkouts()
+        }
+
         binding.btnBack.setOnClickListener {
             finish()
         }
     }
 
     private fun displaySummary() {
+        val workouts = WorkoutRepository.getAllWorkouts()
+        val totalWorkouts = workouts.size
+        val totalSets = workouts.sumOf { it.sets }
+        val totalReps = workouts.sumOf { it.reps }
+        val totalVolume = workouts.sumOf { it.sets * it.reps * it.weight }
+
+        binding.tvTotalWorkouts.text = "Total Workouts: $totalWorkouts"
+        binding.tvTotalSets.text = "Total Sets: $totalSets"
+        binding.tvTotalReps.text = "Total Reps: $totalReps"
+        
+        val calories = String.format("%.2f", totalVolume * 0.1)
+        binding.tvTotalCalories.text = "Estimated Calories: $calories kcal"
+    }
+
+    private fun loadFreshWorkouts() {
         val uid = FirebaseRepository.getCurrentUserId()
-        if (uid.isEmpty()) return
+        if (uid.isEmpty()) {
+            binding.swipeRefreshLayout.isRefreshing = false
+            return
+        }
 
         FirebaseRepository.database.child("workouts").child(uid)
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
-                    var totalWorkouts = 0
-                    var totalSets = 0
-                    var totalReps = 0
-                    var totalVolume = 0.0
-
+                    val workoutList = mutableListOf<Workout>()
                     for (child in snapshot.children) {
-                        val workout = child.getValue(Workout::class.java) ?: continue
-                        totalWorkouts++
-                        totalSets += workout.sets
-                        totalReps += workout.reps
-                        totalVolume += workout.sets * workout.reps * workout.weight
+                        val workout = child.getValue(Workout::class.java)
+                        if (workout != null) {
+                            workoutList.add(workout)
+                        }
                     }
 
-                    binding.tvTotalWorkouts.text = "Total Workouts: $totalWorkouts"
-                    binding.tvTotalSets.text = "Total Sets: $totalSets"
-                    binding.tvTotalReps.text = "Total Reps: $totalReps"
-                    
-                    val calories = String.format("%.2f", totalVolume * 0.1)
-                    binding.tvTotalCalories.text = "Estimated Calories: $calories kcal"
+                    // Update memory cache
+                    val email = FirebaseRepository.auth.currentUser?.email ?: ""
+                    if (email.isNotEmpty()) {
+                        val cacheList = AppRepository.getWorkoutsForCurrentUser()
+                        cacheList.clear()
+                        cacheList.addAll(workoutList)
+                    }
+
+                    // Recalculate summary metrics instantly
+                    displaySummary()
+
+                    binding.swipeRefreshLayout.isRefreshing = false
                 }
 
-                override fun onCancelled(error: DatabaseError) {}
+                override fun onCancelled(error: DatabaseError) {
+                    binding.swipeRefreshLayout.isRefreshing = false
+                    Toast.makeText(this@SummaryActivity, error.message, Toast.LENGTH_SHORT).show()
+                }
             })
     }
 }

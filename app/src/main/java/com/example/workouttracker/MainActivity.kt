@@ -8,6 +8,7 @@ import android.util.Base64
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -17,6 +18,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.workouttracker.adapter.WorkoutAdapter
 import com.example.workouttracker.database.UserProfileDatabase
 import com.example.workouttracker.data.FirebaseRepository
+import com.example.workouttracker.data.AppRepository
+import com.example.workouttracker.data.WorkoutRepository
 import com.example.workouttracker.databinding.ActivityMainBinding
 import com.example.workouttracker.model.User
 import com.example.workouttracker.model.Workout
@@ -35,6 +38,14 @@ class MainActivity : AppCompatActivity() {
     private lateinit var adapter: WorkoutAdapter
     private lateinit var toggle: ActionBarDrawerToggle
 
+    private val addWorkoutLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == RESULT_OK) {
+            syncWorkouts()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -42,11 +53,16 @@ class MainActivity : AppCompatActivity() {
 
         setupToolbarAndDrawer()
         setupRecyclerView()
+        
+        binding.swipeRefreshLayout.setOnRefreshListener {
+            syncWorkouts()
+        }
+        
         syncWorkouts()
 
         binding.btnAddWorkout.setOnClickListener {
             val intent = Intent(this, AddWorkoutActivity::class.java)
-            startActivity(intent)
+            addWorkoutLauncher.launch(intent)
         }
 
         binding.btnViewSummary.setOnClickListener {
@@ -68,12 +84,15 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.nav_add_workout -> {
                     startActivity(Intent(this, AddWorkoutActivity::class.java))
+                    binding.drawerLayout.closeDrawer(GravityCompat.START)
                 }
                 R.id.nav_summary -> {
                     startActivity(Intent(this, SummaryActivity::class.java))
+                    binding.drawerLayout.closeDrawer(GravityCompat.START)
                 }
                 R.id.nav_profile -> {
                     startActivity(Intent(this, ProfileActivity::class.java))
+                    binding.drawerLayout.closeDrawer(GravityCompat.START)
                 }
                 R.id.nav_logout -> {
                     logout()
@@ -118,6 +137,10 @@ class MainActivity : AppCompatActivity() {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     val user = snapshot.getValue(User::class.java) ?: return
                     
+                    // Cache the user profile
+                    AppRepository.currentUser = user
+                    AppRepository.registerUser(user)
+                    
                     val headerView = binding.navView.getHeaderView(0)
                     val tvName = headerView.findViewById<TextView>(R.id.tvHeaderName)
                     val tvEmail = headerView.findViewById<TextView>(R.id.tvHeaderEmail)
@@ -152,7 +175,7 @@ class MainActivity : AppCompatActivity() {
             onEdit = { workout ->
                 val intent = Intent(this, AddWorkoutActivity::class.java)
                 intent.putExtra("WORKOUT_ID", workout.id)
-                startActivity(intent)
+                addWorkoutLauncher.launch(intent)
             },
             onDelete = { workout ->
                 showDeleteConfirmation(workout.id)
@@ -164,16 +187,22 @@ class MainActivity : AppCompatActivity() {
 
     private fun syncWorkouts() {
         val uid = FirebaseRepository.getCurrentUserId()
-        if (uid.isEmpty()) return
+        if (uid.isEmpty()) {
+            binding.swipeRefreshLayout.isRefreshing = false
+            return
+        }
 
-        binding.progressBar.visibility = View.VISIBLE
-        binding.rvWorkouts.visibility = View.GONE
+        if (!binding.swipeRefreshLayout.isRefreshing) {
+            binding.progressBar.visibility = View.VISIBLE
+            binding.rvWorkouts.visibility = View.GONE
+        }
 
         FirebaseRepository.database.child("workouts").child(uid)
-            .addValueEventListener(object : ValueEventListener {
+            .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     binding.progressBar.visibility = View.GONE
                     binding.rvWorkouts.visibility = View.VISIBLE
+                    binding.swipeRefreshLayout.isRefreshing = false
                     
                     val workoutList = mutableListOf<Workout>()
                     for (child in snapshot.children) {
@@ -182,6 +211,31 @@ class MainActivity : AppCompatActivity() {
                             workoutList.add(workout)
                         }
                     }
+                    
+                    // Update memory cache
+                    val email = FirebaseRepository.auth.currentUser?.email ?: ""
+                    if (email.isNotEmpty()) {
+                        if (AppRepository.currentUser == null || AppRepository.currentUser?.email != email) {
+                            AppRepository.currentUser = User(email = email)
+                        }
+                        AppRepository.currentUser?.let { user ->
+                            AppRepository.registerUser(user)
+                            val cacheList = AppRepository.getWorkoutsForCurrentUser()
+                            cacheList.clear()
+                            cacheList.addAll(workoutList)
+                        }
+                    }
+                    
+                    // Calculate summary metrics dynamically
+                    val totalCount = workoutList.size
+                    val thisWeekCount = workoutList.size
+                    val caloriesSum = workoutList.sumOf { it.sets * it.reps * it.weight } * 0.1
+                    val calStr = if (caloriesSum % 1 == 0.0) caloriesSum.toInt().toString() else String.format("%.1f", caloriesSum)
+                    
+                    binding.tvSummaryTotal.text = totalCount.toString()
+                    binding.tvSummaryThisWeek.text = thisWeekCount.toString()
+                    binding.tvSummaryCalories.text = calStr
+                    
                     adapter.updateList(workoutList)
                     
                     if (workoutList.isEmpty()) {
@@ -196,6 +250,7 @@ class MainActivity : AppCompatActivity() {
                 override fun onCancelled(error: DatabaseError) {
                     binding.progressBar.visibility = View.GONE
                     binding.rvWorkouts.visibility = View.VISIBLE
+                    binding.swipeRefreshLayout.isRefreshing = false
                     Toast.makeText(this@MainActivity, error.message, Toast.LENGTH_SHORT).show()
                 }
             })
@@ -207,12 +262,42 @@ class MainActivity : AppCompatActivity() {
             .setMessage("Are you sure you want to delete this workout?")
             .setPositiveButton("Delete") { _, _ ->
                 val uid = FirebaseRepository.getCurrentUserId()
+                
+                // Show spinner while deleting
+                binding.progressBar.visibility = View.VISIBLE
+                
                 FirebaseRepository.database.child("workouts").child(uid).child(id)
                     .removeValue()
                     .addOnSuccessListener {
                         Toast.makeText(this, "Workout deleted", Toast.LENGTH_SHORT).show()
+                        
+                        // Instantly update memory cache
+                        WorkoutRepository.deleteWorkout(id)
+                        val updatedList = WorkoutRepository.getAllWorkouts()
+                        
+                        // Recalculate dashboard metrics dynamically
+                        val totalCount = updatedList.size
+                        val caloriesSum = updatedList.sumOf { it.sets * it.reps * it.weight } * 0.1
+                        val calStr = if (caloriesSum % 1 == 0.0) caloriesSum.toInt().toString() else String.format("%.1f", caloriesSum)
+                        
+                        binding.tvSummaryTotal.text = totalCount.toString()
+                        binding.tvSummaryThisWeek.text = totalCount.toString()
+                        binding.tvSummaryCalories.text = calStr
+                        
+                        adapter.updateList(updatedList)
+                        
+                        binding.progressBar.visibility = View.GONE
+                        
+                        if (updatedList.isEmpty()) {
+                            binding.rvWorkouts.visibility = View.GONE
+                            binding.tvEmptyState.visibility = View.VISIBLE
+                        } else {
+                            binding.rvWorkouts.visibility = View.VISIBLE
+                            binding.tvEmptyState.visibility = View.GONE
+                        }
                     }
                     .addOnFailureListener {
+                        binding.progressBar.visibility = View.GONE
                         Toast.makeText(this, it.message, Toast.LENGTH_SHORT).show()
                     }
             }
