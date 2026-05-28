@@ -20,6 +20,14 @@ class WorkoutAdapter(
             binding.tvCategory.text = workout.category
             binding.tvWorkoutDetails.text = "${workout.sets} Sets x ${workout.reps} Reps @ ${workout.weight} kg"
 
+            if (workout.timestamp > 0L) {
+                val sdf = java.text.SimpleDateFormat("EEEE, MMM d, yyyy • h:mm a", java.util.Locale.getDefault())
+                binding.tvWorkoutTimestamp.text = sdf.format(java.util.Date(workout.timestamp))
+                binding.tvWorkoutTimestamp.visibility = android.view.View.VISIBLE
+            } else {
+                binding.tvWorkoutTimestamp.visibility = android.view.View.GONE
+            }
+
             binding.btnEdit.setOnClickListener { onEdit(workout) }
             binding.btnDelete.setOnClickListener { onDelete(workout) }
         }

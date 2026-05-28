@@ -266,12 +266,11 @@ class MainActivity : AppCompatActivity() {
                     
                     // Calculate summary metrics dynamically
                     val totalCount = workoutList.size
-                    val thisWeekCount = workoutList.size
                     val caloriesSum = workoutList.sumOf { it.sets * it.reps * it.weight } * 0.1
                     val calStr = if (caloriesSum % 1 == 0.0) caloriesSum.toInt().toString() else String.format("%.1f", caloriesSum)
                     
                     binding.tvSummaryTotal.text = totalCount.toString()
-                    binding.tvSummaryThisWeek.text = thisWeekCount.toString()
+                    binding.tvSummaryStreak.text = calculateStreak(workoutList).toString()
                     binding.tvSummaryCalories.text = calStr
                     
                     filterWorkouts(getCurrentSearchQuery())
@@ -311,7 +310,7 @@ class MainActivity : AppCompatActivity() {
                         val calStr = if (caloriesSum % 1 == 0.0) caloriesSum.toInt().toString() else String.format("%.1f", caloriesSum)
                         
                         binding.tvSummaryTotal.text = totalCount.toString()
-                        binding.tvSummaryThisWeek.text = totalCount.toString()
+                        binding.tvSummaryStreak.text = calculateStreak(updatedList).toString()
                         binding.tvSummaryCalories.text = calStr
                         
                         filterWorkouts(getCurrentSearchQuery())
@@ -364,6 +363,46 @@ class MainActivity : AppCompatActivity() {
     private fun getCurrentSearchQuery(): String {
         val searchView = searchItem?.actionView as? androidx.appcompat.widget.SearchView
         return if (searchItem?.isActionViewExpanded == true) searchView?.query?.toString() ?: "" else ""
+    }
+
+    private fun calculateStreak(workouts: List<Workout>): Int {
+        val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
+        val uniqueDays = workouts
+            .filter { it.timestamp > 0L }
+            .map { sdf.format(java.util.Date(it.timestamp)) }
+            .toSet()
+
+        if (uniqueDays.isEmpty()) return 0
+
+        val calendar = java.util.Calendar.getInstance()
+        val todayStr = sdf.format(calendar.time)
+
+        calendar.add(java.util.Calendar.DAY_OF_YEAR, -1)
+        val yesterdayStr = sdf.format(calendar.time)
+
+        if (!uniqueDays.contains(todayStr) && !uniqueDays.contains(yesterdayStr)) {
+            return 0
+        }
+
+        var checkDate = if (uniqueDays.contains(todayStr)) {
+            java.util.Calendar.getInstance()
+        } else {
+            val cal = java.util.Calendar.getInstance()
+            cal.add(java.util.Calendar.DAY_OF_YEAR, -1)
+            cal
+        }
+
+        var streak = 0
+        while (true) {
+            val dateStr = sdf.format(checkDate.time)
+            if (uniqueDays.contains(dateStr)) {
+                streak++
+                checkDate.add(java.util.Calendar.DAY_OF_YEAR, -1)
+            } else {
+                break
+            }
+        }
+        return streak
     }
 
     private fun filterWorkouts(query: String) {

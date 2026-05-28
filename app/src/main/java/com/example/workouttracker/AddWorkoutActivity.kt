@@ -166,7 +166,10 @@ class AddWorkoutActivity : AppCompatActivity() {
         val ref = FirebaseRepository.database.child("workouts").child(uid)
         val id = workoutId ?: ref.push().key ?: return
         
-        val workout = Workout(id, name, sets, reps, weight, category)
+        val originalWorkout = if (workoutId != null) WorkoutRepository.getWorkoutById(workoutId!!) else null
+        val timestamp = originalWorkout?.timestamp ?: System.currentTimeMillis()
+        
+        val workout = Workout(id, name, sets, reps, weight, category, timestamp)
         binding.progressBar.visibility = View.VISIBLE
         ref.child(id).setValue(workout)
             .addOnSuccessListener {
@@ -174,7 +177,7 @@ class AddWorkoutActivity : AppCompatActivity() {
                     val templateRef = FirebaseRepository.database.child("templates").child(uid)
                     val templateId = templateRef.push().key ?: ""
                     if (templateId.isNotEmpty()) {
-                        val template = Workout(templateId, name, sets, reps, weight, category)
+                        val template = Workout(templateId, name, sets, reps, weight, category, 0L)
                         templateRef.child(templateId).setValue(template)
                         AppRepository.getTemplatesForCurrentUser().add(template)
                     }

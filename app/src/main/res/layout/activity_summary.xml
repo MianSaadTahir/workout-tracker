@@ -87,7 +87,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="WORKOUTS"
+                            android:text="Your Fitness Journey Milestone"
                             android:textSize="12sp"
                             android:textStyle="bold"
                             android:textColor="@color/white"
@@ -99,19 +99,10 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Total Workouts: 0"
-                            android:textSize="28sp"
+                            android:textSize="26sp"
                             android:textStyle="bold"
                             android:textColor="@color/white"
                             android:gravity="center" />
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:text="Your Fitness Journey Milestone"
-                            android:textSize="14sp"
-                            android:textColor="@color/white"
-                            android:alpha="0.9" />
 
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
@@ -150,7 +141,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Total Sets: 0"
-                                android:textSize="18sp"
+                                android:textSize="16sp"
                                 android:textStyle="bold"
                                 android:textColor="@color/colorPrimary"
                                 android:gravity="center" />
@@ -189,7 +180,7 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="Total Reps: 0"
-                                android:textSize="18sp"
+                                android:textSize="16sp"
                                 android:textStyle="bold"
                                 android:textColor="@color/colorPrimary"
                                 android:gravity="center" />
@@ -215,7 +206,7 @@
                     app:cardBackgroundColor="@color/colorSurface"
                     android:layout_marginTop="8dp"
                     android:layout_margin="6dp"
-                    android:layout_marginBottom="24dp"
+                    android:layout_marginBottom="8dp"
                     android:clipChildren="false"
                     android:clipToPadding="false">
 
@@ -251,10 +242,65 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="4dp"
-                                android:text="Estimated Calories: 0 kcal"
-                                android:textSize="20sp"
+                                android:text="Calories: 0 kcal"
+                                android:textSize="16sp"
                                 android:textStyle="bold"
-                                android:textColor="@color/colorSuccess" />
+                                android:textColor="@color/colorPrimary" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Streak Hero Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="4dp"
+                    app:cardBackgroundColor="@color/colorSurface"
+                    android:layout_marginTop="8dp"
+                    android:layout_margin="6dp"
+                    android:layout_marginBottom="24dp"
+                    android:clipChildren="false"
+                    android:clipToPadding="false">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:padding="20dp"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="⚡"
+                            android:textSize="40sp" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:layout_marginStart="16dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Active Logging Streak"
+                                android:textSize="12sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/colorTextSecondary" />
+
+                            <TextView
+                                android:id="@+id/tvSummaryStreakVal"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="Streak: 0 days"
+                                android:textSize="16sp"
+                                android:textStyle="bold"
+                                android:textColor="@color/colorPrimary" />
 
                         </LinearLayout>
 
