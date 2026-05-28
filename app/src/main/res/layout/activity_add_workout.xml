@@ -50,6 +50,66 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
+                <!-- Template Selection Card -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="4dp"
+                    app:cardBackgroundColor="@color/colorSurface"
+                    android:layout_margin="4dp"
+                    android:layout_marginBottom="12dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:gravity="center_vertical"
+                            android:layout_marginBottom="12dp">
+
+                            <View
+                                android:layout_width="4dp"
+                                android:layout_height="18dp"
+                                android:background="@color/colorSuccess" />
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="8dp"
+                                android:text="Use a Template"
+                                android:textColor="@color/colorSuccess"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <Spinner
+                            android:id="@+id/spinnerTemplates"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:minHeight="48dp"
+                            android:spinnerMode="dropdown" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btnDeleteTemplate"
+                            style="@style/Widget.MaterialComponents.Button.TextButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Delete Selected Template"
+                            android:textColor="@color/colorError"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            android:visibility="gone"
+                            android:layout_marginTop="8dp"
+                            app:rippleColor="#20FF0000" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
                 <!-- Card Container for Inputs -->
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
@@ -213,6 +273,16 @@
                                     android:spinnerMode="dropdown" />
                             </LinearLayout>
                         </com.google.android.material.card.MaterialCardView>
+
+                        <!-- Save as Template Checkbox -->
+                        <com.google.android.material.checkbox.MaterialCheckBox
+                            android:id="@+id/cbSaveAsTemplate"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="Save as template for future use"
+                            android:textColor="@color/colorTextPrimary"
+                            android:layout_marginBottom="16dp"
+                            app:useMaterialThemeColors="true" />
 
                         <!-- Save Workout button -->
                         <com.google.android.material.button.MaterialButton

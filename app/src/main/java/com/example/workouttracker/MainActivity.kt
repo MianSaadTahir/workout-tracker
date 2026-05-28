@@ -197,6 +197,33 @@ class MainActivity : AppCompatActivity() {
             binding.rvWorkouts.visibility = View.GONE
         }
 
+        // Fetch and cache templates in background
+        FirebaseRepository.database.child("templates").child(uid)
+            .addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val templateList = mutableListOf<Workout>()
+                    for (child in snapshot.children) {
+                        val template = child.getValue(Workout::class.java)
+                        if (template != null) {
+                            templateList.add(template)
+                        }
+                    }
+                    val email = FirebaseRepository.auth.currentUser?.email ?: ""
+                    if (email.isNotEmpty()) {
+                        if (AppRepository.currentUser == null || AppRepository.currentUser?.email != email) {
+                            AppRepository.currentUser = User(email = email)
+                        }
+                        AppRepository.currentUser?.let { user ->
+                            AppRepository.registerUser(user)
+                            val cacheTemplates = AppRepository.getTemplatesForCurrentUser()
+                            cacheTemplates.clear()
+                            cacheTemplates.addAll(templateList)
+                        }
+                    }
+                }
+                override fun onCancelled(error: DatabaseError) {}
+            })
+
         FirebaseRepository.database.child("workouts").child(uid)
             .addListenerForSingleValueEvent(object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
@@ -211,6 +238,7 @@ class MainActivity : AppCompatActivity() {
                             workoutList.add(workout)
                         }
                     }
+                    workoutList.reverse()
                     
                     // Update memory cache
                     val email = FirebaseRepository.auth.currentUser?.email ?: ""

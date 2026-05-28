@@ -6,6 +6,7 @@ import com.example.workouttracker.model.Workout
 object AppRepository {
     private val userList = mutableListOf<User>()
     private val workoutMap = HashMap<String, MutableList<Workout>>()
+    private val templatesMap = HashMap<String, MutableList<Workout>>()
     var currentUser: User? = null
 
     fun registerUser(user: User): Boolean {
@@ -14,6 +15,7 @@ object AppRepository {
         }
         userList.add(user)
         workoutMap[user.email] = mutableListOf()
+        templatesMap[user.email] = mutableListOf()
         return true
     }
 
@@ -25,6 +27,10 @@ object AppRepository {
 
     fun getWorkoutsForCurrentUser(): MutableList<Workout> {
         return currentUser?.let { workoutMap[it.email] } ?: mutableListOf()
+    }
+
+    fun getTemplatesForCurrentUser(): MutableList<Workout> {
+        return currentUser?.let { templatesMap[it.email] } ?: mutableListOf()
     }
 
     fun logout() {
