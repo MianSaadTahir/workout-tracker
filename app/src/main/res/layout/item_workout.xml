@@ -5,72 +5,115 @@
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="16dp"
     android:layout_marginVertical="8dp"
+    app:cardCornerRadius="12dp"
     app:cardElevation="4dp"
-    app:cardCornerRadius="8dp">
+    app:cardBackgroundColor="@color/colorSurface">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp">
+        android:orientation="horizontal"
+        android:padding="16dp"
+        android:gravity="center_vertical">
 
+        <!-- Left/Center Details Container -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:layout_weight="1"
+            android:orientation="vertical">
 
+            <!-- Category Pill -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp">
+
+                <TextView
+                    android:id="@+id/tvCategory"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Chest"
+                    android:background="@color/colorHighlight"
+                    android:textColor="@color/colorPrimary"
+                    android:textSize="12sp"
+                    android:textStyle="bold"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="4dp" />
+            </LinearLayout>
+
+            <!-- Workout Name -->
             <TextView
                 android:id="@+id/tvWorkoutName"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:text="Bench Press"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:textColor="@color/black" />
+                android:textColor="@color/colorTextPrimary"
+                android:layout_marginBottom="4dp" />
 
+            <!-- Sets x Reps Details -->
             <TextView
-                android:id="@+id/tvCategory"
-                android:layout_width="wrap_content"
+                android:id="@+id/tvWorkoutDetails"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Chest"
-                android:background="#E3F2FD"
-                android:paddingHorizontal="8dp"
-                android:paddingVertical="4dp"
-                android:textColor="#1976D2"
-                android:textSize="12sp" />
+                android:text="3 sets × 10 reps @ 60 kg"
+                android:textColor="@color/colorTextSecondary"
+                android:textSize="14sp" />
+
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/tvWorkoutDetails"
+        <!-- Right Buttons Container -->
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="3 Sets x 12 Reps @ 60.0 kg"
-            android:textSize="16sp" />
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="end"
-            android:layout_marginTop="12dp">
+            android:gravity="center"
+            android:layout_marginStart="16dp">
 
+            <!-- Edit Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnEdit"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Edit" />
+                style="@style/Widget.MaterialComponents.Button.Icon"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:padding="0dp"
+                app:icon="@drawable/ic_edit"
+                app:iconSize="20dp"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:iconTint="@color/colorPrimary"
+                app:backgroundTint="#E8F5E9"
+                app:cornerRadius="18dp"
+                app:rippleColor="@color/colorHighlight"
+                android:layout_marginEnd="8dp"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:insetLeft="0dp"
+                android:insetRight="0dp"
+                android:contentDescription="Edit" />
 
+            <!-- Delete Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnDelete"
-                style="@style/Widget.MaterialComponents.Button.TextButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Delete"
-                android:textColor="@android:color/holo_red_dark" />
+                style="@style/Widget.MaterialComponents.Button.Icon"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:padding="0dp"
+                app:icon="@drawable/ic_delete"
+                app:iconSize="20dp"
+                app:iconGravity="textStart"
+                app:iconPadding="0dp"
+                app:iconTint="@color/colorError"
+                app:backgroundTint="#FFEBEE"
+                app:cornerRadius="18dp"
+                app:rippleColor="#FFCDD2"
+                android:insetTop="0dp"
+                android:insetBottom="0dp"
+                android:insetLeft="0dp"
+                android:insetRight="0dp"
+                android:contentDescription="Delete" />
 
         </LinearLayout>
 
