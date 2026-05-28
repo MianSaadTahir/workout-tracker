@@ -15,6 +15,7 @@
         android:layout_height="72dp"
         android:scaleType="centerCrop"
         android:src="@android:drawable/ic_menu_camera"
+        android:padding="1.5dp"
         app:shapeAppearanceOverlay="@style/CircleShape"
         app:strokeColor="@color/white"
         app:strokeWidth="2.5dp" />

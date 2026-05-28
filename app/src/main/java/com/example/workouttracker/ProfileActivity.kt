@@ -130,6 +130,7 @@ class ProfileActivity : AppCompatActivity() {
             } else if (cachedUser.gender == "Female") {
                 binding.rbFemale.isChecked = true
             }
+            binding.switchPublicProfile.isChecked = cachedUser.isPublic
         }
 
         val uid = FirebaseRepository.getCurrentUserId()
@@ -159,6 +160,7 @@ class ProfileActivity : AppCompatActivity() {
                     } else if (user.gender == "Female") {
                         binding.rbFemale.isChecked = true
                     }
+                    binding.switchPublicProfile.isChecked = user.isPublic
                 }
                 override fun onCancelled(error: DatabaseError) {}
             })
@@ -184,13 +186,15 @@ class ProfileActivity : AppCompatActivity() {
         }
 
         val gender = if (binding.rbMale.isChecked) "Male" else "Female"
+        val isPublic = binding.switchPublicProfile.isChecked
         val uid = FirebaseRepository.getCurrentUserId()
         if (uid.isEmpty()) return
 
         val updates = mutableMapOf<String, Any>(
             "name" to name,
             "age" to age,
-            "gender" to gender
+            "gender" to gender,
+            "isPublic" to isPublic
         )
         
         // profilePicUri is NOT saved to Firebase anymore

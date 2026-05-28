@@ -72,6 +72,7 @@
                              android:layout_height="100dp"
                              android:scaleType="centerCrop"
                              android:src="@android:drawable/ic_menu_camera"
+                             android:padding="1.5dp"
                              app:shapeAppearanceOverlay="@style/CircleShape"
                              app:strokeColor="@color/colorPrimary"
                              app:strokeWidth="3dp" />
@@ -200,7 +201,7 @@
                              android:layout_width="match_parent"
                              android:layout_height="wrap_content"
                              android:orientation="horizontal"
-                             android:layout_marginBottom="32dp">
+                             android:layout_marginBottom="16dp">
 
                              <com.google.android.material.radiobutton.MaterialRadioButton
                                  android:id="@+id/rbMale"
@@ -219,6 +220,34 @@
                                  android:textColor="@color/colorTextPrimary"
                                  app:useMaterialThemeColors="true" />
                          </RadioGroup>
+
+                         <!-- Profile Privacy Toggle -->
+                         <TextView
+                             android:layout_width="match_parent"
+                             android:layout_height="wrap_content"
+                             android:text="Profile Privacy"
+                             android:textColor="@color/colorTextPrimary"
+                             android:textSize="16sp"
+                             android:textStyle="bold"
+                             android:layout_marginBottom="4dp"/>
+
+                         <TextView
+                             android:layout_width="match_parent"
+                             android:layout_height="wrap_content"
+                             android:text="Allow users to see your workout stats."
+                             android:textColor="@color/colorTextSecondary"
+                             android:textSize="12sp"
+                             android:layout_marginBottom="8dp"/>
+
+                         <com.google.android.material.switchmaterial.SwitchMaterial
+                             android:id="@+id/switchPublicProfile"
+                             android:layout_width="match_parent"
+                             android:layout_height="wrap_content"
+                             android:text="Public Profile"
+                             android:textColor="@color/colorTextPrimary"
+                             android:textSize="16sp"
+                             android:layout_marginBottom="24dp"
+                             app:useMaterialThemeColors="true"/>
 
                          <!-- Save Changes Button -->
                          <com.google.android.material.button.MaterialButton
