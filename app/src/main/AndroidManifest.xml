@@ -34,6 +34,7 @@
         <activity android:name=".ProfileActivity" android:exported="false" />
         <activity android:name=".LeaderboardActivity" android:exported="false" />
         <activity android:name=".BmiActivity" android:exported="false" />
+        <activity android:name=".ChangePasswordActivity" android:exported="false" android:screenOrientation="portrait" />
         
     </application>
 

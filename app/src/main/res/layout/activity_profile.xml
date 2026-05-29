@@ -252,13 +252,30 @@
                                      android:textSize="16sp" />
                              </com.google.android.material.textfield.TextInputLayout>
 
-                             <Spinner
-                                 android:id="@+id/spinnerWeightUnit"
-                                 android:layout_width="0dp"
-                                 android:layout_height="wrap_content"
-                                 android:layout_weight="1.2"
-                                 android:layout_marginStart="8dp"
-                                 android:layout_marginTop="4dp" />
+                              <LinearLayout
+                                  android:layout_width="0dp"
+                                  android:layout_height="wrap_content"
+                                  android:layout_weight="1.2"
+                                  android:orientation="vertical"
+                                  android:layout_marginStart="8dp"
+                                  android:gravity="center">
+
+                                  <Spinner
+                                      android:id="@+id/spinnerWeightUnit"
+                                      android:layout_width="match_parent"
+                                      android:layout_height="wrap_content" />
+
+                                  <TextView
+                                      android:id="@+id/tvSelectedWeightUnit"
+                                      android:layout_width="wrap_content"
+                                      android:layout_height="wrap_content"
+                                      android:text="Unit: kg"
+                                      android:textSize="12sp"
+                                      android:textStyle="bold"
+                                      android:textColor="@color/colorPrimary"
+                                      android:layout_marginTop="4dp"
+                                      android:gravity="center" />
+                              </LinearLayout>
                          </LinearLayout>
 
                          <!-- Height Input Row -->
@@ -292,13 +309,30 @@
                                      android:textSize="16sp" />
                              </com.google.android.material.textfield.TextInputLayout>
 
-                             <Spinner
-                                 android:id="@+id/spinnerHeightUnit"
-                                 android:layout_width="0dp"
-                                 android:layout_height="wrap_content"
-                                 android:layout_weight="1.2"
-                                 android:layout_marginStart="8dp"
-                                 android:layout_marginTop="4dp" />
+                              <LinearLayout
+                                  android:layout_width="0dp"
+                                  android:layout_height="wrap_content"
+                                  android:layout_weight="1.2"
+                                  android:orientation="vertical"
+                                  android:layout_marginStart="8dp"
+                                  android:gravity="center">
+
+                                  <Spinner
+                                      android:id="@+id/spinnerHeightUnit"
+                                      android:layout_width="match_parent"
+                                      android:layout_height="wrap_content" />
+
+                                  <TextView
+                                      android:id="@+id/tvSelectedHeightUnit"
+                                      android:layout_width="wrap_content"
+                                      android:layout_height="wrap_content"
+                                      android:text="Unit: meters"
+                                      android:textSize="12sp"
+                                      android:textStyle="bold"
+                                      android:textColor="@color/colorPrimary"
+                                      android:layout_marginTop="4dp"
+                                      android:gravity="center" />
+                              </LinearLayout>
                          </LinearLayout>
 
                          <!-- Profile Privacy Toggle -->
@@ -341,6 +375,17 @@
                              android:backgroundTint="@color/colorPrimary"
                              android:textColor="@color/white"
                              app:cornerRadius="12dp" />
+
+                         <!-- Change Password Button -->
+                         <com.google.android.material.button.MaterialButton
+                             android:id="@+id/btnChangePassword"
+                             style="@style/Widget.MaterialComponents.Button.TextButton"
+                             android:layout_width="match_parent"
+                             android:layout_height="wrap_content"
+                             android:text="Change Password"
+                             android:textSize="14sp"
+                             android:textColor="@color/colorPrimary"
+                             android:layout_marginTop="8dp" />
 
                      </LinearLayout>
                  </com.google.android.material.card.MaterialCardView>

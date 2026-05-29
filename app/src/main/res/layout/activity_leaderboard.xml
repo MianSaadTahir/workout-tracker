@@ -40,7 +40,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Rank by category:"
+        android:text="Filter by:"
         android:textSize="14sp"
         android:textStyle="bold"
         android:textColor="@color/colorTextSecondary"

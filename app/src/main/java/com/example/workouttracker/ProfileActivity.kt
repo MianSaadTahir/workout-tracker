@@ -1,5 +1,6 @@
 package com.example.workouttracker
 
+import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -64,6 +65,22 @@ class ProfileActivity : AppCompatActivity() {
         heightAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spinnerHeightUnit.adapter = heightAdapter
 
+        binding.spinnerWeightUnit.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: View?, position: Int, id: Long) {
+                val selected = weightUnits[position]
+                binding.tvSelectedWeightUnit.text = "Unit: $selected"
+            }
+            override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
+        }
+
+        binding.spinnerHeightUnit.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: View?, position: Int, id: Long) {
+                val selected = heightUnits[position]
+                binding.tvSelectedHeightUnit.text = "Unit: $selected"
+            }
+            override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
+        }
+
         binding.btnBack.setOnClickListener {
             finish()
         }
@@ -77,6 +94,10 @@ class ProfileActivity : AppCompatActivity() {
 
         binding.btnSaveChanges.setOnClickListener {
             saveChanges()
+        }
+
+        binding.btnChangePassword.setOnClickListener {
+            startActivity(Intent(this, ChangePasswordActivity::class.java))
         }
     }
 
