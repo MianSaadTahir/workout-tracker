@@ -4,6 +4,17 @@ A native Android application designed to help users log workouts, track streaks,
 
 ---
 
+## 📌 Table of Contents
+* [Features](#-features)
+* [Architecture & Tech Stack](#-architecture--tech-stack)
+* [Screenshots](#-screenshots)
+* [Setting Up the Project](#-setting-up-the-project)
+* [Verification & Testing](#-verification--testing)
+* [Documentation](#-documentation)
+* [Contributing](#-contributing)
+* [License](#-license)
+---
+
 ## ✨ Features
 
 ### 1. 📊 Interactive Dashboard
@@ -58,6 +69,17 @@ graph TD
 * **Authentication**: **Firebase Auth** handles secure email/password registration, login, and on-demand user reauthentication.
 
 ---
+## Screenshots
+
+  <img src="assets/1.jpg" alt="1" width="48%">
+  <img src="assets/2.jpg" alt="2" width="48%">
+  <img src="assets/3.jpg" alt="3" width="48%">
+  <img src="assets/4.jpg" alt="4" width="48%">
+  <img src="assets/5.jpg" alt="5" width="48%">
+  <img src="assets/6.jpg" alt="6" width="48%">
+  <img src="assets/7.jpg" alt="7" width="48%">
+---
+
 
 ## 🚀 Setting Up the Project
 
@@ -93,4 +115,26 @@ Verify that compilation and build processes complete successfully with:
 ```bash
 ./gradlew build
 ```
-Manual test protocols are documented comprehensively inside the active development walkthroughs for local deployment checks.
+
+
+
+---
+
+## Documentation
+
+For a detailed overview, refer to the [Documentation](./documentation) in the repository.
+
+
+---
+
+
+## Contributing
+
+Contributions, issues, and feature requests are welcome!  
+Feel free to check out the [issues page](https://github.com/MianSaadTahir/workout-tracker/issues).
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](https://github.com/MianSaadTahir/workout-tracker/blob/main/LICENSE).
