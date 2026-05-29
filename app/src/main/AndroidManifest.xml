@@ -33,6 +33,7 @@
         <activity android:name=".SummaryActivity" android:exported="false" />
         <activity android:name=".ProfileActivity" android:exported="false" />
         <activity android:name=".LeaderboardActivity" android:exported="false" />
+        <activity android:name=".BmiActivity" android:exported="false" />
         
     </application>
 

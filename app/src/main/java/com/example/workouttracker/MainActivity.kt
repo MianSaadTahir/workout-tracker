@@ -83,7 +83,8 @@ class MainActivity : AppCompatActivity() {
         toggle.syncState()
 
         binding.navView.setNavigationItemSelectedListener { menuItem ->
-            when (menuItem.itemId) {
+            val id = menuItem.itemId
+            when (id) {
                 R.id.nav_dashboard -> {
                     binding.drawerLayout.closeDrawer(GravityCompat.START)
                 }
@@ -103,11 +104,16 @@ class MainActivity : AppCompatActivity() {
                     startActivity(Intent(this, LeaderboardActivity::class.java))
                     binding.drawerLayout.closeDrawer(GravityCompat.START)
                 }
+                R.id.nav_bmi -> {
+                    startActivity(Intent(this, BmiActivity::class.java))
+                    binding.drawerLayout.closeDrawer(GravityCompat.START)
+                }
                 R.id.nav_logout -> {
                     logout()
                 }
             }
-            true
+            binding.navView.setCheckedItem(R.id.nav_dashboard)
+            false
         }
 
         // Header clicks
