@@ -99,6 +99,10 @@ class MainActivity : AppCompatActivity() {
                     startActivity(Intent(this, ProfileActivity::class.java))
                     binding.drawerLayout.closeDrawer(GravityCompat.START)
                 }
+                R.id.nav_leaderboard -> {
+                    startActivity(Intent(this, LeaderboardActivity::class.java))
+                    binding.drawerLayout.closeDrawer(GravityCompat.START)
+                }
                 R.id.nav_logout -> {
                     logout()
                 }
