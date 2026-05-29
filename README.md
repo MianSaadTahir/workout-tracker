@@ -83,6 +83,11 @@ graph TD
 
 ## 🚀 Setting Up the Project
 
+### 📱 Direct APK Installation
+You can install the pre-built application package directly:
+* Head to the [assets/](file:///Users/saad/Documents/UET/Sem6/MAD/Project/workout-tracker/assets/) directory.
+* Locate and install the [workout-tracker.apk](file:///Users/saad/Documents/UET/Sem6/MAD/Project/workout-tracker/assets/workout-tracker.apk) on your Android device or emulator.
+
 ### Prerequisites
 * Android Studio (Koala or later recommended)
 * Android SDK 34+
