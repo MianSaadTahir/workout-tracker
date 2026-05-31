@@ -127,7 +127,7 @@ Verify that compilation and build processes complete successfully with:
 
 ## Documentation
 
-For a detailed overview, refer to the [Documentation](./Documentation) in the repository.
+For a detailed overview, refer to the [Documentation](./Documentaion) in the repository.
 
 
 ---
