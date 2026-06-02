@@ -46,6 +46,12 @@ A native Android application designed to help users log workouts, track streaks,
 * **Profile Privacy Toggle**: Simple switch material to toggle profile privacy (Public vs Private) on-the-spot.
 * **Secure Change Password**: Dedicated Change Password screen protected by strict registration-strength validation regex and real-time Firebase Auth reauthentication.
 
+### 6. 🌦️ Weather Widget & Workout Recommendation
+* **Real-time GPS Location**: Uses `FusedLocationProviderClient` to fetch current coordinates, fetching live temperature, descriptions, and vector weather icons.
+* **Smart Permission Fallback**: Requests `ACCESS_FINE_LOCATION` permission at runtime and falls back gracefully to a default city (**Lahore**) if denied.
+* **Workout Recommendation Engine**: Analyzes temperature and conditions to suggest tailored workout plans (e.g. outdoor training in pleasant 20–28°C weather, indoor training in cold <10°C/extreme heat >38°C, and gym day on rainy days, or indoor training during fog/smoke).
+* **Fault-Tolerant Design**: Fails silently without crashing if the OpenWeatherMap API call fails or has no network, automatically hiding the dashboard weather card.
+
 ---
 
 ## 🛠️ Architecture & Tech Stack

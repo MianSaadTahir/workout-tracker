@@ -35,6 +35,10 @@ import com.google.firebase.database.ValueEventListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.example.workouttracker.data.WeatherRetrofitClient
+import com.example.workouttracker.data.WeatherResponse
 
 class MainActivity : AppCompatActivity() {
 
@@ -42,6 +46,17 @@ class MainActivity : AppCompatActivity() {
     private lateinit var adapter: WorkoutAdapter
     private lateinit var toggle: ActionBarDrawerToggle
     private var searchItem: MenuItem? = null
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+
+    private val requestLocationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted: Boolean ->
+        if (isGranted) {
+            fetchLocationAndWeather()
+        } else {
+            fetchWeatherForDefaultCity()
+        }
+    }
 
     private val addWorkoutLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -56,14 +71,18 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
         setupToolbarAndDrawer()
         setupRecyclerView()
         
         binding.swipeRefreshLayout.setOnRefreshListener {
             syncWorkouts()
+            checkLocationPermissionAndFetchWeather()
         }
         
         syncWorkouts()
+        checkLocationPermissionAndFetchWeather()
 
         binding.btnAddWorkout.setOnClickListener {
             val intent = Intent(this, AddWorkoutActivity::class.java)
@@ -432,6 +451,158 @@ class MainActivity : AppCompatActivity() {
         } else {
             binding.rvWorkouts.visibility = View.VISIBLE
             binding.tvEmptyState.visibility = View.GONE
+        }
+    }
+
+    private fun checkLocationPermissionAndFetchWeather() {
+        binding.weatherCard.visibility = View.VISIBLE
+        binding.layoutWeatherLoading.visibility = View.VISIBLE
+        binding.layoutWeatherContent.visibility = View.GONE
+
+        if (androidx.core.content.ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        ) {
+            fetchLocationAndWeather()
+        } else {
+            requestLocationPermissionLauncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+    }
+
+    private fun fetchLocationAndWeather() {
+        try {
+            if (androidx.core.content.ContextCompat.checkSelfPermission(
+                    this,
+                    android.Manifest.permission.ACCESS_FINE_LOCATION
+                ) != android.content.pm.PackageManager.PERMISSION_GRANTED
+            ) {
+                fetchWeatherForDefaultCity()
+                return
+            }
+
+            fusedLocationClient.lastLocation
+                .addOnSuccessListener { location ->
+                    if (location != null) {
+                        fetchWeatherByCoordinates(location.latitude, location.longitude)
+                    } else {
+                        fetchWeatherForDefaultCity()
+                    }
+                }
+                .addOnFailureListener {
+                    fetchWeatherForDefaultCity()
+                }
+        } catch (e: Exception) {
+            fetchWeatherForDefaultCity()
+        }
+    }
+
+    private fun fetchWeatherForDefaultCity() {
+        fetchWeatherByCity("Lahore")
+    }
+
+    private fun fetchWeatherByCoordinates(lat: Double, lon: Double) {
+        lifecycleScope.launch {
+            try {
+                val response = withContext(Dispatchers.IO) {
+                    WeatherRetrofitClient.service.getWeatherByCoordinates(
+                        lat = lat,
+                        lon = lon,
+                        apiKey = WeatherRetrofitClient.API_KEY
+                    )
+                }
+                displayWeather(response)
+            } catch (e: Exception) {
+                // Fail silently
+                binding.weatherCard.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun fetchWeatherByCity(city: String) {
+        lifecycleScope.launch {
+            try {
+                val response = withContext(Dispatchers.IO) {
+                    WeatherRetrofitClient.service.getWeatherByCity(
+                        city = city,
+                        apiKey = WeatherRetrofitClient.API_KEY
+                    )
+                }
+                displayWeather(response)
+            } catch (e: Exception) {
+                // Fail silently
+                binding.weatherCard.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun android.widget.ImageView.loadUrl(url: String) {
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val connection = java.net.URL(url).openConnection() as java.net.HttpURLConnection
+                connection.doInput = true
+                connection.connect()
+                val input = connection.inputStream
+                val bitmap = BitmapFactory.decodeStream(input)
+                withContext(Dispatchers.Main) {
+                    this@loadUrl.setImageBitmap(bitmap)
+                }
+            } catch (e: Exception) {
+                // Fail silently
+            }
+        }
+    }
+
+    private fun displayWeather(response: WeatherResponse) {
+        try {
+            val temp = response.main.temp
+            val mainWeather = response.weather.firstOrNull()?.main ?: ""
+            val description = response.weather.firstOrNull()?.description ?: ""
+            val icon = response.weather.firstOrNull()?.icon ?: ""
+
+            binding.tvWeatherTemp.text = "${temp.toInt()}°C"
+            binding.tvWeatherLocation.text = response.name
+            binding.tvWeatherDescription.text = description.replaceFirstChar { it.uppercase() }
+            
+            val recommendation = getWorkoutRecommendation(temp, mainWeather, description)
+            binding.tvWeatherRecommendation.text = recommendation
+
+            if (icon.isNotEmpty()) {
+                val iconUrl = "https://openweathermap.org/img/wn/$icon@2x.png"
+                binding.ivWeatherIcon.loadUrl(iconUrl)
+            }
+
+            binding.layoutWeatherLoading.visibility = View.GONE
+            binding.layoutWeatherContent.visibility = View.VISIBLE
+            binding.weatherCard.visibility = View.VISIBLE
+        } catch (e: Exception) {
+            binding.weatherCard.visibility = View.GONE
+        }
+    }
+
+    private fun getWorkoutRecommendation(temp: Double, mainWeather: String, description: String): String {
+        val mainLower = mainWeather.lowercase()
+        val descLower = description.lowercase()
+        
+        return when {
+            mainLower.contains("rain") || mainLower.contains("drizzle") || mainLower.contains("thunderstorm") -> {
+                "Rain detected!. Don't forget to take an umbrella with you."
+            }
+            mainLower.contains("fog") || mainLower.contains("smoke") || mainLower.contains("haze") || mainLower.contains("mist") || descLower.contains("smoky") || descLower.contains("foggy") -> {
+                "Indoors today due to air quality / low visibility."
+            }
+            temp > 38.0 -> {
+                "Indoor workout. Avoid the heat of ${temp.toInt()}°C. Stay hydrated!"
+            }
+            temp < 10.0 -> {
+                "Indoor workout. Too cold (${temp.toInt()}°C) outside today."
+            }
+            temp in 20.0..28.0 -> {
+                "Outdoor workout! Pleasant ${temp.toInt()}°C. Perfect day for outdoor cardio!"
+            }
+            else -> {
+                "Great day for a regular workout session!"
+            }
         }
     }
 }

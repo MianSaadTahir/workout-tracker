@@ -60,4 +60,9 @@ dependencies {
     implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+
+    // Location & Weather API
+    implementation(libs.play.services.location)
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.converter.gson)
 }
