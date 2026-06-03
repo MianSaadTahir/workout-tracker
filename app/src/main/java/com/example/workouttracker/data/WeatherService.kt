@@ -44,7 +44,12 @@ object WeatherRetrofitClient {
     // Put your OpenWeatherMap API key here
     const val API_KEY = "890309d8b37eda48a5d90d9dc1fdb528"
 
-    val service: WeatherApiService by lazy {
+    var serviceOverride: WeatherApiService? = null
+
+    val service: WeatherApiService
+        get() = serviceOverride ?: lazyService
+
+    private val lazyService: WeatherApiService by lazy {
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())

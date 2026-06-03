@@ -267,14 +267,7 @@ class ProfileActivity : AppCompatActivity() {
         val uid = FirebaseRepository.getCurrentUserId()
         if (uid.isEmpty()) return
 
-        var bmi = 0.0
-        if (weight > 0.0 && height > 0.0) {
-            val weightKg = if (weightUnit == "lb") weight * 0.45359237 else weight
-            val heightMeters = if (heightUnit == "inches") height * 0.0254 else height
-            if (heightMeters > 0.0) {
-                bmi = weightKg / (heightMeters * heightMeters)
-            }
-        }
+        val bmi = com.example.workouttracker.util.BmiCalculator.calculateBmi(weight, height, weightUnit, heightUnit)
 
         val updates = mutableMapOf<String, Any>(
             "name" to name,

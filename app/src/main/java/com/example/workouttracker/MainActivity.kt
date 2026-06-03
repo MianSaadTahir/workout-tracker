@@ -395,43 +395,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun calculateStreak(workouts: List<Workout>): Int {
-        val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
-        val uniqueDays = workouts
-            .filter { it.timestamp > 0L }
-            .map { sdf.format(java.util.Date(it.timestamp)) }
-            .toSet()
-
-        if (uniqueDays.isEmpty()) return 0
-
-        val calendar = java.util.Calendar.getInstance()
-        val todayStr = sdf.format(calendar.time)
-
-        calendar.add(java.util.Calendar.DAY_OF_YEAR, -1)
-        val yesterdayStr = sdf.format(calendar.time)
-
-        if (!uniqueDays.contains(todayStr) && !uniqueDays.contains(yesterdayStr)) {
-            return 0
-        }
-
-        var checkDate = if (uniqueDays.contains(todayStr)) {
-            java.util.Calendar.getInstance()
-        } else {
-            val cal = java.util.Calendar.getInstance()
-            cal.add(java.util.Calendar.DAY_OF_YEAR, -1)
-            cal
-        }
-
-        var streak = 0
-        while (true) {
-            val dateStr = sdf.format(checkDate.time)
-            if (uniqueDays.contains(dateStr)) {
-                streak++
-                checkDate.add(java.util.Calendar.DAY_OF_YEAR, -1)
-            } else {
-                break
-            }
-        }
-        return streak
+        return com.example.workouttracker.util.StreakCalculator.calculateStreak(workouts)
     }
 
     private fun filterWorkouts(query: String) {
@@ -581,28 +545,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getWorkoutRecommendation(temp: Double, mainWeather: String, description: String): String {
-        val mainLower = mainWeather.lowercase()
-        val descLower = description.lowercase()
-        
-        return when {
-            mainLower.contains("rain") || mainLower.contains("drizzle") || mainLower.contains("thunderstorm") -> {
-                "Rain detected!. Don't forget to take an umbrella with you."
-            }
-            mainLower.contains("fog") || mainLower.contains("smoke") || mainLower.contains("haze") || mainLower.contains("mist") || descLower.contains("smoky") || descLower.contains("foggy") -> {
-                "Indoors today due to air quality / low visibility."
-            }
-            temp > 38.0 -> {
-                "Indoor workout. Avoid the heat of ${temp.toInt()}°C. Stay hydrated!"
-            }
-            temp < 10.0 -> {
-                "Indoor workout. Too cold (${temp.toInt()}°C) outside today."
-            }
-            temp in 20.0..28.0 -> {
-                "Outdoor workout! Pleasant ${temp.toInt()}°C. Perfect day for outdoor cardio!"
-            }
-            else -> {
-                "Great day for a regular workout session!"
-            }
-        }
+        return com.example.workouttracker.util.WeatherRecommendation.getWorkoutRecommendation(temp, mainWeather, description)
+    }
+
+    override fun checkSelfPermission(permission: String): Int {
+        return permissionOverride ?: super.checkSelfPermission(permission)
+    }
+
+    companion object {
+        var permissionOverride: Int? = null
     }
 }

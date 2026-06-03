@@ -122,10 +122,32 @@ You can install the pre-built application package directly:
 
 ## 🧪 Verification & Testing
 
-Verify that compilation and build processes complete successfully with:
-```bash
-./gradlew build
-```
+### 1. Running Unit & Integration Tests
+* **Unit Tests**: Test core calculations (BMI, streak, input validator, weather recommendations):
+  ```bash
+  ./gradlew test
+  ```
+* **Integration/Android Tests**: Run in-memory Room Database DAO tests and Espresso UI activity tests:
+  ```bash
+  ./gradlew connectedAndroidTest
+  ```
+
+### 2. Code Quality & Style Analysis
+This project uses **ktlint** and **detekt** to enforce clean code and styling standards:
+* **Code Style (ktlint)**:
+  * Verify code style rules:
+    ```bash
+    ./gradlew ktlintCheck
+    ```
+  * Automatically fix formatting violations:
+    ```bash
+    ./gradlew ktlintFormat
+    ```
+* **Static Code Analysis (detekt)**:
+  * Run code quality diagnostics:
+    ```bash
+    ./gradlew detekt
+    ```
 
 
 

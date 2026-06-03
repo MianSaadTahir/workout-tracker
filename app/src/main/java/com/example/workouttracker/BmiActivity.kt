@@ -105,28 +105,14 @@ class BmiActivity : AppCompatActivity() {
             return
         }
 
-        // Convert weight to kg
-        val weightKg = if (weightUnit == "lb") {
-            weight * 0.45359237
-        } else {
-            weight
-        }
+        val bmi = com.example.workouttracker.util.BmiCalculator.calculateBmi(weight, height, weightUnit, heightUnit)
 
-        // Convert height to meters
-        val heightMeters = if (heightUnit == "inches") {
-            height * 0.0254
-        } else {
-            height
-        }
-
-        if (heightMeters <= 0.0) {
+        if (bmi <= 0.0) {
             binding.layoutMissingDetails.visibility = View.VISIBLE
             binding.layoutBmiResult.visibility = View.GONE
             hideLoadingViews()
             return
         }
-
-        val bmi = weightKg / (heightMeters * heightMeters)
 
         // Save calculated BMI to Firebase under users/$uid/bmi
         if (saveToDb) {
@@ -139,32 +125,28 @@ class BmiActivity : AppCompatActivity() {
         binding.tvBmiScore.text = String.format("%.2f", bmi)
         binding.tvBmiMetricsSummary.text = "Height: $height $heightUnit | Weight: $weight $weightUnit"
 
-        val category: String
+        val category = com.example.workouttracker.util.BmiCalculator.getCategory(bmi)
         val colorHex: String
         val adviceTitle: String
         val adviceDesc: String
 
-        when {
-            bmi < 18.5 -> {
-                category = "Underweight"
+        when (category) {
+            "Underweight" -> {
                 colorHex = "#FFC107" // Amber
                 adviceTitle = "Underweight Range"
                 adviceDesc = "Your Body Mass Index is in the underweight range. Focus on consuming a balanced diet rich in nutrient-dense foods and consult a healthcare provider or nutritionist for guidance."
             }
-            bmi < 25.0 -> {
-                category = "Normal Weight"
+            "Normal Weight" -> {
                 colorHex = "#4CAF50" // Green
                 adviceTitle = "Healthy Weight Range"
                 adviceDesc = "Great job! Your Body Mass Index is within the normal and healthy weight range. Keep up your active lifestyle and nutritious eating habits to maintain this balance!"
             }
-            bmi < 30.0 -> {
-                category = "Overweight"
+            "Overweight" -> {
                 colorHex = "#FF9800" // Orange
                 adviceTitle = "Overweight Range"
                 adviceDesc = "Your Body Mass Index is in the overweight range. Consider incorporating regular physical activity (such as your tracked workouts!) and adjusting your caloric intake for healthy weight management."
             }
             else -> {
-                category = "Obese"
                 colorHex = "#F44336" // Red
                 adviceTitle = "Obese Range"
                 adviceDesc = "Your Body Mass Index is in the obese range. Prioritizing consistent workout routines, portion control, and consulting a healthcare professional is recommended for support on your wellness journey."

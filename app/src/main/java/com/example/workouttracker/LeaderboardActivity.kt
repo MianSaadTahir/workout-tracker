@@ -163,42 +163,6 @@ class LeaderboardActivity : AppCompatActivity() {
     }
 
     private fun calculateStreak(workouts: List<Workout>): Int {
-        val sdf = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault())
-        val uniqueDays = workouts
-            .filter { it.timestamp > 0L }
-            .map { sdf.format(java.util.Date(it.timestamp)) }
-            .toSet()
-
-        if (uniqueDays.isEmpty()) return 0
-
-        val calendar = java.util.Calendar.getInstance()
-        val todayStr = sdf.format(calendar.time)
-
-        calendar.add(java.util.Calendar.DAY_OF_YEAR, -1)
-        val yesterdayStr = sdf.format(calendar.time)
-
-        if (!uniqueDays.contains(todayStr) && !uniqueDays.contains(yesterdayStr)) {
-            return 0
-        }
-
-        var checkDate = if (uniqueDays.contains(todayStr)) {
-            java.util.Calendar.getInstance()
-        } else {
-            val cal = java.util.Calendar.getInstance()
-            cal.add(java.util.Calendar.DAY_OF_YEAR, -1)
-            cal
-        }
-
-        var streak = 0
-        while (true) {
-            val dateStr = sdf.format(checkDate.time)
-            if (uniqueDays.contains(dateStr)) {
-                streak++
-                checkDate.add(java.util.Calendar.DAY_OF_YEAR, -1)
-            } else {
-                break
-            }
-        }
-        return streak
+        return com.example.workouttracker.util.StreakCalculator.calculateStreak(workouts)
     }
 }

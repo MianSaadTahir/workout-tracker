@@ -15,6 +15,19 @@ class SplashActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Clear any leftover mock overrides from test runs to restore production services
+        com.example.workouttracker.data.FirebaseRepository.authInstance = null
+        com.example.workouttracker.data.FirebaseRepository.databaseReference = null
+        com.example.workouttracker.data.WeatherRetrofitClient.serviceOverride = null
+        MainActivity.permissionOverride = null
+
+        try {
+            android.util.Log.d("FIREBASE_TEST", "auth=${com.google.firebase.auth.FirebaseAuth.getInstance().app.name}")
+        } catch (e: Exception) {
+            android.util.Log.e("FIREBASE_TEST", "Firebase initialization failed: ", e)
+        }
+
         binding = ActivitySplashBinding.inflate(layoutInflater)
         setContentView(binding.root)
 

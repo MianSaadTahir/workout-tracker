@@ -1,0 +1,51 @@
+complexity:
+  active: true
+  LongMethod:
+    active: true
+    threshold: 100
+  TooManyFunctions:
+    active: true
+    thresholdInClasses: 25
+  CyclomaticComplexMethod:
+    active: true
+    threshold: 25
+  ComplexCondition:
+    active: true
+    threshold: 6
+
+style:
+  active: true
+  ReturnCount:
+    active: true
+    max: 6
+  MagicNumber:
+    active: false
+    ignoreNumbers: ['-1', '0', '1', '2', '10', '100', '120', '0.1', '18.5', '25.0', '30.0']
+  MaxLineLength:
+    active: false
+    maxLineLength: 160
+  UseCheckOrError:
+    active: false
+  WildcardImport:
+    active: false
+  NewLineAtEndOfFile:
+    active: false
+  LoopWithTooManyJumpStatements:
+    active: false
+
+exceptions:
+  active: true
+  SwallowedException:
+    active: false
+  TooGenericExceptionCaught:
+    active: false
+
+potential-bugs:
+  active: true
+  ImplicitDefaultLocale:
+    active: false
+
+empty-blocks:
+  active: true
+  EmptyFunctionBlock:
+    active: false
